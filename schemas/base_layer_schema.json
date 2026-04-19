@@ -1,0 +1,15 @@
+{
+  "id": "uuid",
+  "namespace": "project_id",
+  "values": "embedding_vector",
+  "metadata": {
+    "layer": "base_layer",
+    "document_id": "string",
+    "document_type": "string",
+    "section": "string",
+    "chunk_index": "integer",
+    "section_chunk_count": "integer",
+    "text": "string",
+    "token_count": "integer"
+  }
+}

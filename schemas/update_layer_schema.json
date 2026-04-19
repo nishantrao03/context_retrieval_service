@@ -1,0 +1,13 @@
+{
+  "id": "uuid",
+  "namespace": "project_id",
+  "values": "embedding_vector",
+  "metadata": {
+    "layer": "update_layer",
+    "update_status": "active | archived",
+    "atomic_fact": "string",
+    "context": "string",
+    "timestamp": "ISO-8601 string",
+    "document_id": "optional string"
+  }
+}
