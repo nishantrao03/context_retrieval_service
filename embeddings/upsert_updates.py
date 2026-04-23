@@ -20,6 +20,9 @@ async def upsert_updates(
     Batch upserts update vectors into the update layer.
     """
 
+    if not (len(atomic_facts) == len(contexts) == len(context_embeddings)):
+        raise ValueError("Input lists must have the same length.")
+
     index = get_pinecone_index(index_name, EMBEDDING_DIMENSION)
 
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -30,9 +33,10 @@ async def upsert_updates(
 
         vector_id = str(uuid.uuid4())
 
+        timestamp = datetime.now(timezone.utc).isoformat()
+
         metadata = {
             "layer": "update_layer",
-            "update_status": "active",
             "atomic_fact": atomic_facts[i],
             "context": contexts[i],
             "timestamp": timestamp

@@ -214,9 +214,9 @@ from ingestion.loaders.pdf_processor import parse_pdf
 from ingestion.loaders.doc_extractor import extract_document
 from llm_helper.gemini_helper import call_gemini
 # from retrieval.update_context_retrieval import retrieve_context_for_updates
-from retrieval.update_retrieval import fetch_update_chunks
+# from retrieval.update_retrieval import fetch_update_chunks
 from embeddings.embedder import TextEmbedder
-from updation.archive_chunks import archive_chunks
+# from updation.archive_chunks import archive_chunks
 from embeddings.upsert_updates import upsert_updates
 
 async def build_update_context(
@@ -438,12 +438,9 @@ Output Schema:
 
             atomic_facts = [u["atomic_fact"] for u in updates]
             contexts = [u["context"] for u in updates]
-            search_queries = [u["search_query"] for u in updates]
-            update_types = [u["update_type"] for u in updates]
 
             # atomic_fact_embeddings = embedder.embed_text_batch(atomic_facts)
             context_embeddings = embedder.embed_text_batch(contexts)
-            search_query_embeddings = embedder.embed_text_batch(search_queries)
 
             # print(atomic_fact_embeddings)
             # print(context_embeddings)
@@ -461,29 +458,29 @@ Output Schema:
                 "error": str(e)
             }
 
-        # Retrieve update chunks
-        try:
-            retrieved_update_chunks = await fetch_update_chunks(
-                search_query_embeddings,
-                update_types,
-                project_id
-            )
-        except Exception as e:
-            return {
-                "status": "error",
-                "stage": "update_chunk_retrieval",
-                "error": str(e)
-            }
+        # # Retrieve update chunks
+        # try:
+        #     retrieved_update_chunks = await fetch_update_chunks(
+        #         search_query_embeddings,
+        #         update_types,
+        #         project_id
+        #     )
+        # except Exception as e:
+        #     return {
+        #         "status": "error",
+        #         "stage": "update_chunk_retrieval",
+        #         "error": str(e)
+        #     }
 
-        # Archive retrieved chunks
-        try:
-            await archive_chunks(retrieved_update_chunks, project_id)
-        except Exception as e:
-            return {
-                "status": "error",
-                "stage": "chunk_archival",
-                "error": str(e)
-            }
+        # # Archive retrieved chunks
+        # try:
+        #     await archive_chunks(retrieved_update_chunks, project_id)
+        # except Exception as e:
+        #     return {
+        #         "status": "error",
+        #         "stage": "chunk_archival",
+        #         "error": str(e)
+        #     }
 
         # Upsert new updates
         try:
@@ -504,8 +501,8 @@ Output Schema:
             "status": "llm_extraction_completed",
             "project_id": project_id,
             "payload_length": len(final_payload),
-            "extracted_updates": validated_json,
-            "retrieved_update_chunks": retrieved_update_chunks
+            "extracted_updates": validated_json
+            # "retrieved_update_chunks": retrieved_update_chunks
         }
 
     except Exception as e:
