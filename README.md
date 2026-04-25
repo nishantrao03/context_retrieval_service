@@ -91,7 +91,7 @@ cd context_retrieval_service
     - Provide a name for the key and optionally set permissions (available for upgraded accounts).
     - Copy the key immediately as it will not be accessible later.
     - This key is used for the vector database.
-  - **Gemini API Key**: [Google AI Studio](https://ai.google.com/)
+  - **Gemini API Key**: [Google AI Studio](https://aistudio.google.com/)
     - Log in, navigate to `Get API Key`, and select `Create API Key`.
     - Provide a name and select a project (if applicable).
     - Copy the key immediately as it will not be accessible later.
@@ -105,13 +105,3 @@ cd context_retrieval_service
   python app.py
   ```
 - The server will be available at `http://localhost:8000`.
-
----
-
-## Contributing
-Contributions are welcome! Please fork the repository and submit a pull request for any improvements or bug fixes.
-
----
-
-## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
