@@ -105,3 +105,77 @@ cd context_retrieval_service
   python app.py
   ```
 - The server will be available at `http://localhost:8000`.
+
+---
+
+## ☁️ Google Drive API Integration
+
+This project utilizes the Google Drive API to automatically upload files ingested from Slack and generate public viewing links. Because this app runs headless in production and uses a standard Google account (not a Workspace account), we use OAuth 2.0 User Credentials with a permanent Refresh Token strategy rather than a Service Account.
+
+### Step 1: Google Cloud Setup & Authentication
+To allow the backend to upload files to your personal Google Drive, you must generate an OAuth 2.0 Client ID.
+
+**Enable the API:**
+- Go to the Google Cloud Console, navigate to **APIs & Services > Library**, search for "Google Drive API", and click **Enable**.
+
+**Configure the Consent Screen:**
+- Go to **APIs & Services > OAuth consent screen**.
+- Select **External** and click **Create**.
+- Fill in the required App Name (e.g., Slack RAG Agent) and User Support Email.
+- Skip the "Scopes" section (click Save and Continue).
+- **CRITICAL:** Under the Test users section, click **+ Add Users** and type the exact personal Gmail address you will use to host the files.
+
+**Generate Credentials:**
+- Go to **APIs & Services > Credentials**.
+- Click **+ CREATE CREDENTIALS > OAuth client ID**.
+- Select **Desktop app** as the Application type.
+- Click **Create** and click **DOWNLOAD JSON**.
+
+### Step 2: Project Configuration
+- Move the downloaded JSON file into the root directory of your Python project.
+- Rename it to exactly `credentials.json`.
+
+**Security Check:** Immediately open your `.gitignore` file and ensure the following lines are added. Never commit these files to version control.
+
+```
+# Google Drive API Secrets
+credentials.json
+token.json
+```
+
+### Step 3: Initializing the Token (First Run Only)
+Before the server can run headlessly in the background, you must manually authorize it once to generate a permanent `token.json` file.
+
+- Ensure you have a target folder created in your personal Google Drive and have copied its Folder ID (the long string of characters at the end of the folder's URL).
+- Open `gdrive/gdrive_upload_helper.py` and temporarily paste your Folder ID into the test block at the bottom.
+- Run the script locally:
+
+```bash
+python gdrive/gdrive_upload_helper.py
+```
+
+- A web browser will automatically open asking you to sign in.
+- Log in using the exact Gmail address you added as a Test User.
+- Click **Advanced** and proceed past the "Google hasn't verified this app" warning.
+- Grant the requested permissions.
+- Check your project root directory. A new file named `token.json` will have been generated. The backend will now use this file to authenticate silently in the background moving forward.
+
+### Step 4: Pushing to Production (Bypassing the 7-Day Expiration)
+By default, Google puts new apps in "Testing" mode, which strictly causes the `token.json` file to expire every 7 days. To make your headless authentication permanent, you must publish the app.
+
+- Go back to the Google Cloud Console.
+- Navigate to **APIs & Services > OAuth consent screen** (or Audience / Verification Center, depending on your console layout).
+- Under Publishing status, click the **PUBLISH APP** (or "Push to Production") button.
+- Accept the warning about Verification.
+
+> **Note:** Because you are the only user logging into this app, you do not need to actually submit the app to Google for manual verification. Simply changing the status to "In production" permanently removes the 7-day expiration timer.
+
+---
+
+### 🚀 Usage in the Application
+The logic is split into two secure modules:
+
+- `gdrive_config.py`: Handles reading the `token.json` file, renewing the token silently if it expires, and establishing the Google Drive API connection.
+- `gdrive_upload_helper.py`: Contains the `upload_file_to_gdrive(file_name, folder_id)` function.
+
+When a file is passed from the Slack ingestion route, the helper function pushes it directly to the specified Drive folder in its native format (PDF, DOCX, etc.) and returns a viewable web link for the bot to serve back to the user.

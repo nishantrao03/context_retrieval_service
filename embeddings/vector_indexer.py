@@ -81,15 +81,15 @@ def index_vectors(
     for i in range(0, len(formatted_vectors), batch_size):
         batch = formatted_vectors[i:i + batch_size]
 
-        for vector_data in batch:
-            print("--- Debug: Vector Payload ---")
-            print(json.dumps(vector_data, indent=2))
+        # for vector_data in batch:
+        #     print("--- Debug: Vector Payload ---")
+        #     print(json.dumps(vector_data, indent=2))
 
         pinecone_index.upsert(
             vectors=batch,
             namespace=project_id
         )
 
-        print(f"Upserted batch: {i} to {i + len(batch)}")
+        # print(f"Upserted batch: {i} to {i + len(batch)}")
 
-    print(f"Successfully processed and uploaded {len(formatted_vectors)} vectors.")
+    # print(f"Successfully processed and uploaded {len(formatted_vectors)} vectors.")

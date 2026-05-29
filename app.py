@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from routes.ingestion_routes import router as ingestion_router
 from routes.update_route import router as update_router
 from routes.retrieval_route import router as retrieval_router
+from routes.delete_route import router as delete_router
 
 app = FastAPI(title="Context Retrieval Service")
 
@@ -13,6 +14,8 @@ app.include_router(ingestion_router)
 app.include_router(update_router)
 # Register the retrieval routes with the main application
 app.include_router(retrieval_router)
+# Register the delete routes with the main application
+app.include_router(delete_router)
 
 @app.get("/health")
 def health_check():
