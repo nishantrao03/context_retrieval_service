@@ -4,3 +4,4 @@ __pycache__/
 chroma_db/
 .ipynb_checkpoints/
 credentials.json
+removed_from_readme/

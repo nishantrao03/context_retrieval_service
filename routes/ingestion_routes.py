@@ -114,6 +114,7 @@ if project_root not in sys.path:
 
 from helpers.context_builder import build_context_from_file
 from helpers.slack_file_download import download_slack_file
+from helpers.gdrive_file_download import download_gdrive_file
 
 # Initialize the router to be included in app.py later
 router = APIRouter()
@@ -144,7 +145,8 @@ async def process_file(
     Process a single file through download and ingestion pipeline.
     """
     async with INGESTION_SEMAPHORE:
-        private_download_url = file_metadata["private_download_url"]
+        download_url = file_metadata["download_url"]
+        source = file_metadata["source"]
         project_id = file_metadata["project_id"]
         document_id = file_metadata["document_id"]
         document_type = file_metadata["document_type"]
@@ -170,11 +172,24 @@ async def process_file(
             )
 
             # Download Phase
-            await download_slack_file(
-                session=session,
-                private_download_url=private_download_url,
-                temp_file_path=temp_file_path
-            )
+            if source == "slack":
+                await download_slack_file(
+                    session=session,
+                    private_download_url=download_url,
+                    temp_file_path=temp_file_path
+                )
+
+            elif source == "google_drive":
+                await download_gdrive_file(
+                    session=session,
+                    google_drive_url=download_url,
+                    temp_file_path=temp_file_path
+                )
+
+            else:
+                raise Exception(
+                    f"Unsupported source: {source}"
+                )
 
             print(
                 f"[{get_timestamp()}] "
@@ -224,7 +239,20 @@ async def ingest_document(
     files_metadata: list[dict] = Body(...)
 ):
     """
-    API endpoint to receive Slack file metadata,
+    Expected payload:
+
+    [
+        {
+            "download_url": "",
+            "source": "",
+            "project_id": "",
+            "document_id": "",
+            "document_type": "",
+            "document_name": ""
+        }
+    ]
+
+    API endpoint to receive file metadata,
     download files, and process them through the RAG pipeline.
     """
     if not isinstance(files_metadata, list):
@@ -244,17 +272,26 @@ async def ingest_document(
 
     # Validation Phase
     for file_metadata in files_metadata:
-        private_download_url = file_metadata.get("private_download_url")
+        download_url = file_metadata.get("download_url")
+        source = file_metadata.get("source")
         project_id = file_metadata.get("project_id")
         document_id = file_metadata.get("document_id")
         document_type = file_metadata.get("document_type")
         document_name = file_metadata.get("document_name")
 
-        if not private_download_url:
+        if not download_url:
             validation_results.append({
                 "document_id": document_id,
                 "ingestion_success": 0,
-                "error_message": "Missing private_download_url"
+                "error_message": "Missing download_url"
+            })
+            continue
+
+        if not source:
+            validation_results.append({
+                "document_id": document_id,
+                "ingestion_success": 0,
+                "error_message": "Missing source"
             })
             continue
 
@@ -323,4 +360,3 @@ async def ingest_document(
             status_code=500,
             detail=f"Ingestion pipeline failed: {str(e)}"
         )
-

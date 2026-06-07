@@ -89,6 +89,7 @@
 
 # routes/update_route.py
 
+import json
 import os
 import shutil
 import sys
@@ -113,55 +114,72 @@ ALLOWED_EXTENSIONS = {".pdf", ".docx", ".pptx", ".xlsx", ".txt"}
 @router.post("/api/update")
 async def update_document(
     project_id: str = Form(...),
-    update_text: Optional[str] = Form(None),
-    file: Optional[UploadFile] = File(None)
+    # update_text: Optional[str] = Form(None),
+    # file: Optional[UploadFile] = File(None)
+    update_json: str = Form(...)
 ):
     """
     Receives update input and processes it through context builder.
     """
 
-    # Validate input
-    if not update_text and not file:
+    # # Validate input
+    # if not update_text and not file:
+    #     raise HTTPException(
+    #         status_code=400,
+    #         detail="You must provide either 'update_text' or a 'file'."
+    #     )
+
+    if not update_json:
         raise HTTPException(
             status_code=400,
-            detail="You must provide either 'update_text' or a 'file'."
+            detail="You must provide 'update_json' for the update operation."
         )
 
-    temp_file_path = None
-    file_extension = None
+        # Parse the incoming string payload into a Python dictionary
+    try:
+        parsed_update_json = json.loads(update_json)
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid JSON format provided in 'update_json'."
+        )
 
-    # Save uploaded file temporarily
-    if file and file.filename:
-        _, file_extension = os.path.splitext(file.filename)
-        file_extension = file_extension.lower()
+    # temp_file_path = None
+    # file_extension = None
 
-        if file_extension not in ALLOWED_EXTENSIONS:
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    f"Unsupported file type: {file_extension}. "
-                    f"Allowed: {ALLOWED_EXTENSIONS}"
-                )
-            )
+    # # Save uploaded file temporarily
+    # if file and file.filename:
+    #     _, file_extension = os.path.splitext(file.filename)
+    #     file_extension = file_extension.lower()
 
-        temp_file_path = os.path.join(TEMP_DIR, file.filename)
+    #     if file_extension not in ALLOWED_EXTENSIONS:
+    #         raise HTTPException(
+    #             status_code=400,
+    #             detail=(
+    #                 f"Unsupported file type: {file_extension}. "
+    #                 f"Allowed: {ALLOWED_EXTENSIONS}"
+    #             )
+    #         )
 
-        try:
-            with open(temp_file_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Failed to save file to disk: {str(e)}"
-            )
+    #     temp_file_path = os.path.join(TEMP_DIR, file.filename)
+
+    #     try:
+    #         with open(temp_file_path, "wb") as buffer:
+    #             shutil.copyfileobj(file.file, buffer)
+    #     except Exception as e:
+    #         raise HTTPException(
+    #             status_code=500,
+    #             detail=f"Failed to save file to disk: {str(e)}"
+    #         )
 
     try:
         # Await async context builder
+        print("Starting update context building...")
         processing_result = await build_update_context(
             project_id=project_id,
-            update_text=update_text,
-            file_path=temp_file_path,
-            file_extension=file_extension
+            update_json=parsed_update_json,
+            # file_path=temp_file_path,
+            # file_extension=file_extension
         )
 
         return processing_result
@@ -172,10 +190,10 @@ async def update_document(
             detail=f"Update Processing Error: {str(e)}"
         )
 
-    finally:
-        # Cleanup temporary file
-        if temp_file_path and os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
+    # finally:
+    #     # Cleanup temporary file
+    #     if temp_file_path and os.path.exists(temp_file_path):
+    #         os.remove(temp_file_path)
 
-        if file:
-            await file.close()
+    #     if file:
+    #         await file.close()
