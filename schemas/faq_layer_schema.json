@@ -1,0 +1,11 @@
+{
+  "id": "uuid",
+  "namespace": "project_id",
+  "values": "embedding_vector",
+  "metadata": {
+    "layer": "faq_layer",
+    "question": "string",
+    "answer": "string",
+    "timestamp": "ISO-8601 string"
+  }
+}
