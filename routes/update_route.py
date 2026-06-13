@@ -182,6 +182,8 @@ async def update_document(
             # file_extension=file_extension
         )
 
+        print( processing_result)
+
         return processing_result
 
     except Exception as e:

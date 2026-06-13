@@ -10,6 +10,7 @@ EMBEDDING_DIMENSION = 384
 async def fetch_base_chunks(
     query_embedding: List[float],
     project_id: str,
+    apply_privacy_filter: bool,
     top_k: int = 5
 ) -> List[Dict[str, Any]]:
     """
@@ -19,15 +20,30 @@ async def fetch_base_chunks(
     try:
         index = get_pinecone_index(INDEX_NAME, EMBEDDING_DIMENSION)
 
-        response = index.query(
-            vector=query_embedding,
-            top_k=top_k,
-            namespace=project_id,
-            include_metadata=True,
-            filter={
-                "layer": "base_layer"
-            }
-        )
+        if apply_privacy_filter:
+            response = index.query(
+                vector=query_embedding,
+                top_k=top_k,
+                namespace=project_id,
+                include_metadata=True,
+                filter={
+                   "layer": "base_layer",
+                   "is_private": False
+                }
+            )
+        
+        else:
+            response = index.query(
+                vector=query_embedding,
+                top_k=top_k,
+                namespace=project_id,
+                include_metadata=True,
+                filter={
+                    "layer": "base_layer"
+                }
+            )
+
+        
 
         matches = response.get("matches", [])
 

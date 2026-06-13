@@ -6,7 +6,7 @@ from retrieval.update_layer_retrieval import fetch_update_chunks
 from retrieval.faq_layer_retreival import fetch_faq_chunks
 
 
-async def retrieve_chunks(query: str, project_id: str) -> Dict[str, List[Any]]:
+async def retrieve_chunks(query: str, project_id: str, apply_privacy_filter: bool) -> Dict[str, List[Any]]:
     """
     Retrieves relevant chunks from base and update layers.
     """
@@ -21,25 +21,27 @@ async def retrieve_chunks(query: str, project_id: str) -> Dict[str, List[Any]]:
         # Fetch base layer chunks
         base_chunks = await fetch_base_chunks(
             query_embedding,
-            project_id
+            project_id,
+            apply_privacy_filter
         )
 
         # Fetch update layer chunks
         update_chunks = await fetch_update_chunks(
             query_embedding,
-            project_id
+            project_id,
+            apply_privacy_filter
         )
 
-        # Fetch FAQ layer chunks
-        faq_chunks = await fetch_faq_chunks(
-            query_embedding,
-            project_id
-        )
+        # # Fetch FAQ layer chunks
+        # faq_chunks = await fetch_faq_chunks(
+        #     query_embedding,
+        #     project_id
+        # )
 
         return {
             "base_chunks": base_chunks,
             "update_chunks": update_chunks,
-            "faq_chunks": faq_chunks
+            # "faq_chunks": faq_chunks
         }
 
     except Exception as e:

@@ -741,8 +741,23 @@ async def build_update_context(
 
             updates = update_json["extracted_updates"]
 
+            for update in updates:
+                if not isinstance(
+                    update.get("is_private"),
+                    bool
+                ):
+                       raise ValueError(
+                            "is_private must be a boolean."
+                        )
+
+
             atomic_facts = [u["atomic_fact"] for u in updates]
             contexts = [u["context"] for u in updates]
+
+            privacy_flags = [
+                u["is_private"]
+                for u in updates
+            ]
 
             # atomic_fact_embeddings = embedder.embed_text_batch(atomic_facts)
             context_embeddings = embedder.embed_text_batch(contexts)
@@ -789,9 +804,11 @@ async def build_update_context(
 
         # Upsert new updates
     try:
+            print(project_id)
             await upsert_updates(
                 atomic_facts,
                 contexts,
+                privacy_flags,
                 context_embeddings,
                 project_id
             )

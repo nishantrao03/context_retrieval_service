@@ -10,6 +10,7 @@ router = APIRouter()
 class RetrievalRequest(BaseModel):
     query: str
     project_id: str
+    apply_privacy_filter: bool
 
 
 @router.post("/api/retrieve")
@@ -22,6 +23,7 @@ async def retrieve_context(request: RetrievalRequest):
     try:
         query = request.query
         project_id = request.project_id
+        apply_privacy_filter = request.apply_privacy_filter
         print(f"Received retrieval request for project_id: {project_id} with query: {query}")
 
         if not query or not project_id:
@@ -30,13 +32,14 @@ async def retrieve_context(request: RetrievalRequest):
                 detail="query and project_id are required"
             )
 
-        chunks = await retrieve_chunks(query, project_id)
+        chunks = await retrieve_chunks(query, project_id, apply_privacy_filter)
         print(f"Retrieved chunks for project_id {project_id}: {chunks}")
 
         return {
             "status": "success",
             "project_id": project_id,
             "query": query,
+            "apply_privacy_filter": apply_privacy_filter,
             "chunks": chunks
         }
 

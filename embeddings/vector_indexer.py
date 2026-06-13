@@ -62,6 +62,7 @@ def index_vectors(
             "layer": "base_layer",
             "document_id": chunk["document_id"],
             "document_type": chunk["document_type"],
+            "is_private": chunk.get("is_private", False),
             "section": chunk["section"],
             "chunk_index": chunk["chunk_index"],
             "section_chunk_count": chunk["section_chunk_count"],
