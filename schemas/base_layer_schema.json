@@ -6,6 +6,7 @@
     "layer": "base_layer",
     "document_id": "string",
     "document_type": "string",
+    "is_private": "boolean",
     "section": "string",
     "chunk_index": "integer",
     "section_chunk_count": "integer",

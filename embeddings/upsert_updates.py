@@ -20,10 +20,7 @@ async def upsert_updates(
     """
     Batch upserts update vectors into the update layer.
     """
-
-    print("Project id")
-    print(project_id)
-
+    
     if not (
         len(atomic_facts)
         == len(contexts)

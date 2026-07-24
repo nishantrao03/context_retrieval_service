@@ -3,11 +3,6 @@
 import asyncio
 from typing import Dict, Any
 
-# TODO: Import your actual vector DB client and embedding function here when ready
-# from embeddings.embedder import get_embedding
-# from vectorstore.pinecone_client import query_pinecone
-
-
 async def _fetch_context_for_single_fact(project_id: str, fact: Dict[str, Any]) -> Dict[str, Any]:
     """
     Asynchronously fetches the general top_k chunks and the specific active chunk 
