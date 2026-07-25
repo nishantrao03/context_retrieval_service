@@ -1,5 +1,6 @@
 __pycache__/
 .env
+.codex/
 .venv/
 chroma_db/
 .ipynb_checkpoints/
